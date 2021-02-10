@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Script to install in:
+# /usr/lib/rpm/redhat/find-requires.d
+#
+# Transform qml imports into RPM requires
+#
+# Author: Davide Bettio <davide.bettio@ispirata.com>
+# Based on other provides scripts from RPM
+#
+
+if [ "$RPM_DISABLE_QML_IMPORTS_AUTOREQ" != "" ] ; then
+    exit 0
+fi
+qmlfiles=`grep -e '\.qml$'`
+
+qmlfiles_list=$(echo $qmlfiles | xargs file -L 2>/dev/null | cut -d: -f1 )
+
+for qmlfile in $qmlfiles_list ; do
+    imports=$(cat $qmlfile | grep "\s*import\s*" | sed 's/\s*import\s*//g' | sed 's/[0-9]*\.[0-9]*\s*\(as\s*[a-zA-Z_]*\s*\)\{0,1\}[;]*\s*$//g')
+    imports_list=$(echo $imports | xargs file -L 2>/dev/null | cut -d: -f1 )
+    for module_name in $imports_list ; do
+        echo "qt5_qml_module($module_name)"
+    done
+done

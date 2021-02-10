@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# Script to install in:
+# /usr/lib/rpm/redhat/find-provides.d
+#
+# Transform qml modules into RPM provides
+#
+# Author: Davide Bettio <davide.bettio@ispirata.com>
+# Based on other provides scripts from RPM
+#
+
+qmldirs=`grep -e 'qmldir$'`
+
+qmldirs_list=$(echo $qmldirs | xargs file -L 2>/dev/null | cut -d: -f1 )
+
+for qmldir in $qmldirs_list ; do
+    module_name=$(dirname $qmldir | sed 's/\/usr\/lib\/qt5\/qml\///g' | sed 's/\//./g')
+    while read -r fline
+    do
+        token1=$(echo $fline | cut -d ' ' -f1)
+        token2=$(echo $fline | cut -d ' ' -f2)
+        if [[ $token1 = 'module' ]]; then
+            module_name=$token2
+        fi
+    done < $qmldir
+    echo "qt5_qml_module($module_name)"
+done

@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# Script to install in:
+# /usr/lib/rpm/redhat/find-provides.d
+#
+# Creates provides for hemera applications
+#
+# Author: Davide Bettio <davide.bettio@ispirata.com>
+# Based on other provides scripts from RPM
+#
+
+hafiles=`grep -e '.ha$'`
+
+hafiles_list=$(echo $hafiles | xargs file -L 2>/dev/null | cut -d: -f1 )
+
+for hafile in $hafiles_list ; do
+    if [[ $(cat $hafile | grep "com.ispirata.Hemera.Settings") ]] ; then
+        echo 'hemera_application('$(basename $hafile | sed 's/\.ha$//g')')'
+    fi
+done

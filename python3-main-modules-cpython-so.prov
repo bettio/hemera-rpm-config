@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Script to install in:
+# /usr/lib/rpm/redhat/find-provides.d
+#
+# Transform python site-packages .py files into RPM provides
+#
+# Author: Davide Bettio <davide.bettio@ispirata.com>
+# Based on other provides scripts from RPM
+#
+
+filelist=`grep -e '[a-zA-Z_][a-zA-Z0-9_]*\.cpython-3[0-9][a-zA-Z]\.so$' | sed "s/\/usr\/lib\/python3\.4\///g" | sed "s/\/__init__\.cpython-3[0-9][a-zA-Z]\.so//g" | sed "s/\.cpython-3[0-9][a-zA-Z].so//g" | sed "s/\//./g"`
+
+modules_list=$(echo $filelist | xargs file -L 2>/dev/null | cut -d: -f1 )
+
+
+for module in $modules_list ; do
+    echo "python3_module($module)"
+done
